@@ -1,0 +1,175 @@
+﻿
+@{
+    ViewData["Title"] = "Valider";
+}
+
+
+<div class="container">
+
+    <div class="row">
+       <div class="col-2"></div>
+
+       <div class="col-8">
+           <div class="row justify-content-center">
+
+               <h3>
+                   Merci d'avoir participé à ce questionnaire<br>
+                   Vous pouvez enregistrer vos réponses, dans la base de données QUIZ !                   
+               </h3>
+                <img src="~/images/data-collection-featured.png" />              
+                 <a id="lienValider" onclick="callEnregistrerReponses()"  class="btn btn-success mt-5">Enregistrer vos reponses</a>               
+           </div>   
+        </div>
+
+        <div class="col-2"></div>        
+    </div>
+</div>
+
+@section Scripts {
+
+    <script type="text/javascript">
+
+        var usermatricule = '';
+    
+        const cocherTampon = {
+            date_Cocher: '',
+            matricule: '',
+            choixId: '',
+            page: '',
+            position: '',
+            questionId: '',
+            sousQuestionId: '',
+            nbreChoixRestant: '',
+            suivant: '',
+            precedent: ''
+        };
+
+        var listeCocher = [1];
+        var listeCocher2 = [];
+       
+
+        $(function () {
+
+            usermatricule = localStorage.getItem("usermatricule");
+          
+
+
+        });
+
+        function callEnregistrerReponses() {
+            debugger;
+
+            if (usermatricule) {                              
+         
+                    saveCoche(usermatricule);
+
+                    saveLotCocher(listeCocher2);
+                    deleteCocheTampon(usermatricule);
+
+                    var url = '@Url.Action("Enregistrer", "Home")';
+                    window.location.href = url;
+
+            } else {
+
+                    DevExpress.ui.notify({
+                    message: "Vous devez cocher une reponse !",
+                    position: {
+                        my: "center top",
+                        at: "right top"
+                    }
+                }, "error", 6000)
+            }
+            
+        }
+
+        function saveCoche(matricule) {
+
+          
+
+            if (matricule) {
+
+                $.ajax({
+                    'async': false,
+                    'global': false,
+                    'type': 'GET',
+                    'url': '@Url.Action("ListeCocherTampon", "Home")' + "?matricule=" + matricule,
+                    'dataType': "json",
+                    'success': function (response) {
+
+                        debugger;
+                        console.log(response.data.length);
+
+                        response.data.forEach(element => {
+                            let cocher = {};
+                            cocher = {
+                                date_Cocher: element.date_Cocher,
+                                matricule: element.matricule,
+                                choixId: element.choixId
+                            };
+
+                            listeCocher2.push(cocher);
+                        });
+
+                    },
+                    error: function (data) {
+                        console.log(data);
+
+                    }
+                });
+            }
+        }
+
+        function deleteCocheTampon(matricule) {
+
+            if (matricule) {
+
+
+                $.ajax({
+                    'async': false,
+                    'global': false,
+                    'type': 'GET',
+                    'url': '@Url.Action("FindCocherTamponForDelete", "Home")' + "?matricule=" + matricule,
+                    'dataType': "json",
+                    'success': function (response) {
+                        console.log(response);
+
+
+                    },
+                    error: function (data) {
+                        console.log(data);
+
+                    }
+                });
+
+            }
+        }
+
+        function saveLotCocher(listeCocher2) {
+
+            var data = JSON.stringify(listeCocher2);
+
+            //--- enregistrer element par element dans table Cocher
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("AjouterCocher", "Home")',
+                traditional: true,
+                data: data,
+                contentType: "application/json; charset=utf-8",
+                success: function (response) {
+                    console.log(response);
+
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            });
+        }
+
+    
+
+    </script>
+
+
+}
+
+

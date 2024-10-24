@@ -1,0 +1,171 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="container">
+    @*<h1 class="display-4">Bienvenue !</h1>*@
+    @*<img src="~/images/images.png" height="200" />*@
+    @*<p>Bienvenue sur la plateforme de questionnaire.</p>*@
+
+
+  
+    <!-- /.login-box -->
+
+    <div class="row justify-content-center">
+        <div class="row">
+
+            <div class="text-center">
+
+                <div class="col-10">
+                    <div class="login-box">
+                        <!-- /.login-logo -->
+                        <div class="card card-outline card-primary">
+                            <div class="card-header text-center">
+                               <img src="~/images/image_1.png" class="img-responsive" height="150" width="150" />
+                            </div>
+                            <div class="card-body">
+                                <p class="login-box-msg">Bienvenue sur la plateforme de questionnaire.</p>                            
+                                                              
+                                    <div class="input-group mb-3">
+                                        <input type="email" id="login" class="form-control" placeholder="Login">
+                                        <div class="input-group-append">
+                                            <div class="input-group-text">
+                                                <span class="fas fa-user"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="input-group mb-3">
+                                        <input type="password" id="mot_de_passe" class="form-control" placeholder="Mot de passe">
+                                        <div class="input-group-append">
+                                            <div class="input-group-text">
+                                                <span class="fas fa-lock"></span>
+                                            </div>
+                                        </div>
+                                    </div>                               
+
+                                    <div class="social-auth-links text-center mt-2 mb-3">
+                                        <a href="#" id="connexion" class="btn btn-block btn-primary">
+                                            <i class="fab fa-sign-in mr-2"></i> Connexion
+                                        </a>
+                                    </div>
+                                <!-- /.social-auth-links -->
+
+
+                            </div>
+                            <!-- /.card-body -->
+                        </div>
+                        <!-- /.card -->
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </div>
+      
+
+    </div>
+
+
+
+</div>
+
+
+
+
+@section Scripts {
+
+    <script type="text/javascript">
+
+
+        $("#connexion").click(function () {
+
+            var utilisateur = {};
+            var usermatricule = localStorage.getItem("usermatricule");
+
+            if (usermatricule != null) {
+                usermatricule = "";
+                localStorage.removeItem("usermatricule");
+            }
+
+            utilisateur.userId = $("#login").val();
+            utilisateur.userPassword = $("#mot_de_passe").val();
+
+                $.ajax({
+                type: 'POST',
+                url: '@Url.Action("ConnexionUser", "Utilisateur")',
+                dataType : "json",
+                data:utilisateur,
+                success: function (response) {
+                    var _service = response;
+
+
+                  if(_service.oneData.usermatricule == null){
+
+                        $("#login").val('');
+                        $("#mot_de_passe").val('');
+
+                          DevExpress.ui.notify({
+                                         message: "Entrer correctement, votre login et/ou mot de passe !",
+                                         position: {
+                                         my: "center top",
+                                        at: "right top"
+                                                    }
+                        }, "error", 6000)
+
+                  }
+
+                  if (_service.oneData.userEstActif == false) {
+
+                        $("#login").val('');
+                        $("#mot_de_passe").val('');
+
+                        DevExpress.ui.notify({
+                            message: "Utilisateur désactivé voir l'Administrateur ! ",
+                            position: {
+                                my: "center top",
+                                at: "right top"
+                            }
+                        }, "error", 6000)
+
+                    }
+
+                  if (_service.oneData.usermatricule != null && _service.oneData.droitAccesId != null && _service.oneData.userEstActif == true ){
+                     
+                      switch (_service.oneData.droitAccesId) {
+
+                            case 1:                               
+                             
+                                var url = '@Url.Action("Login", "Home")';
+                                window.location.href = url;
+                                localStorage.setItem("checkUserMatricule", _service.oneData.usermatricule)
+                                break;
+
+                             case 6:                              
+                                var url = '@Url.Action("Index", "Administration")';
+                                window.location.href = url;
+                            break;
+
+
+                        }
+                   }
+
+                },
+                error: function (request, status, error) {
+
+                    console.log("j'ai trouvé une erreur : " + request.responseText);
+                }
+
+            })
+
+
+
+        })
+
+    </script>
+
+}
+
+

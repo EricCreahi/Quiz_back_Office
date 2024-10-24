@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_PublishTargetUrl>C:\Workspace\WebAppGedQuestionnaireV2\WebAppGedQuestionnaire\bin\Release\netcoreapp3.1\publish\</_PublishTargetUrl>
+    <History>True|2024-02-20T15:29:26.9939021Z;True|2024-02-20T15:15:42.4929014+00:00;True|2023-12-28T17:26:03.6737507+00:00;True|2023-12-28T17:22:38.3872146+00:00;True|2023-12-28T17:20:32.4103701+00:00;True|2023-12-28T17:16:32.2671956+00:00;True|2023-12-28T16:52:15.4783334+00:00;True|2023-12-28T16:34:56.7113809+00:00;True|2023-04-25T09:55:19.1770970+00:00;True|2023-04-25T09:54:57.1451688+00:00;True|2023-04-25T09:48:47.0020447+00:00;True|2023-04-25T09:28:32.4372642+00:00;True|2023-04-25T09:28:05.0224451+00:00;</History>
+    <LastFailureDetails />
+  </PropertyGroup>
+</Project>

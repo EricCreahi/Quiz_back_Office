@@ -1,0 +1,620 @@
+﻿@{
+    ViewData["Title"] = "Questionnaire";
+
+}
+
+
+<div class="container">
+
+    <div class="row justify-content-center">
+        <div class="row">
+            <div class="col-2">
+                <img src="~/images/images.png" height="80%" class="rounded float-start" alt="prince tatie">
+            </div>
+            <div class="col-10">
+                <div class="text-center">
+                    <h1 class="display-4" style="font-family: LoveStoryRough; color: #00A551;">
+                        QUESTIONNAIRE
+                    </h1>
+                    <p>
+                        Veuillez répondre à la question puis cliquez sur <span style="font-style:italic">Suivant</span> pour avancer. <br />
+                        Cochez une et une seule bonne réponse.
+                    </p>
+                    <div id="theme_question"></div>
+                </div>
+                <div class="float-start mt-3" id="positioin_question"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+
+                    <div id="question"></div>
+                    <div class="card-body">
+                        <div style="padding-left:15px">
+                            <div id="listeChoix">
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="card-footer ">
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="row justify-content-start">
+                                    <a id="suivant" onclick="callQuestion()" class=" btn btn-primary">Suivant</a>
+                                </div>
+                            </div>
+
+                            <div class="col-6">
+                                <div class="row justify-content-end">
+                                    <a id="lienValider" onclick="callValider()" hidden class="btn btn-success">Terminer</a>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+
+  
+
+    <script type="text/javascript">
+        
+
+        var usermatricule = '';
+        var nbre_question = 0;
+
+        var question = @ViewData["question"];
+        var numero = @ViewData["numero"];
+        var nbreChoix = @ViewData["nbreChoix"];
+        var nbreChoixTampon =  @ViewData["nbreChoix"];
+
+        var page_suivante =  @ViewData["numero"];
+        var position = @ViewData["position"];
+
+
+
+        var page_suivante_2 = 0;
+        var page_actuelle = position;
+
+        var cocher = 0;
+
+        const cocherTampon = {
+            date_Cocher: '',
+            matricule: '',
+            choixId: '',
+            page: '',
+            position: '',
+            questionId: '',
+            sousQuestionId: '',
+            nbreChoixRestant: '',
+            suivant:'',
+            precedent: ''
+        };
+
+        var  listeCocher = [1];
+        var listeCocher2 = [];
+        let compteur = 0;
+        let sousQuestionId = 0;
+        var now = new Date();
+        var userCreationDate = moment(now, 'DD/MM/YYYY hh:mm:ss', true).format();
+
+        $("#deConnexion").attr('hidden', false);
+        $("#connexion").attr('hidden', true);
+
+
+        $(function () {
+
+            usermatricule = localStorage.getItem("usermatricule");
+        
+
+            $.ajax({
+                'async': false,
+                'global': false,
+                'type': 'GET',
+                'url': '@Url.Action("ReponseSousQuestion", "Home")' + "?numero=" + numero + "&id=" + question,
+                'dataType': "json",
+                'success': function (response) {
+              
+
+                    nbre_question = response.data.length;
+                    $('#theme_question').html(`<h2>THEME :</h2><i>${response.oneData.question.libelle_Question}</i>`);
+                    $('#positioin_question').html(`<h4>Question N° : ${position}-${page_suivante} / ${nbre_question}</h4>`);
+                    $('#question').html(`<h5 class="card-header" style="font-family: LoveStoryRough; color: #03224c;">${response.oneData.libelle_Sous_Question}</h5>`);
+
+
+
+                    if (position == 5 && page_suivante == 6 ) {
+
+                        $('#lienValider').attr('hidden', false);
+                        $('#suivant').attr('hidden', true);
+                    }
+
+                                   
+
+                    const choix = response.oneData.choixes;                 
+                    var_position = numero;
+                    page_suivante_2 = page_suivante;
+
+                   
+                 
+                    page_suivante++;                
+                    nbreChoix--;
+
+                   
+
+                    if (choix.length > 0) {
+
+                        choix.forEach(element => {
+
+                            compteur++;
+                            sousQuestionId = element.sousQuestion.sousQuestionId;
+
+                             $("#listeChoix").append(
+                                '<div class="form-check">' +
+                                '<input class= "form-check-input" type = "checkbox"  onclick="selectOnlyThis(this.id,compteur)"  value = "' + element.choixId + '" id="CheckBox_' + compteur + '">' +
+                                '<label class="form-check-label" for="flexCheckDefault">'
+                                + element.libelle_Choix +
+                                '</label >' +
+                                '<div>'
+                                )
+                            });
+
+                        };
+
+                            },
+                            error: function (data) {
+                                    console.log(data);
+
+                           }
+                     });
+
+     
+
+         });
+
+        function callQuestion() {
+         
+            if (listeCocher[0].suivant == true) {
+
+
+                $.ajax({
+                    'async': false,
+                    'global': false,
+                    'type': 'GET',
+                    'url': '@Url.Action("ChoixSousQuestion", "Home")' + "?numero=" + page_suivante + "&questionid=" + question,
+                    'dataType': "json",
+                    'success': function (response_10) {
+
+                        if (nbreChoix == 0) {
+
+
+                            // if (question == 7) {
+                            //     question = 5;
+                            // }
+                            // if (question == 8) {
+                            //     question = 6;
+                            // }
+
+                                $.ajax({
+                                'async': false,
+                                'global': false,
+                                'type': 'GET',
+                                'url': '@Url.Action("LotSousQuestions", "Home")',
+                                'dataType': "json",
+                                'success': function (response) {
+                               
+
+                                    //----- Lot d'ingrémentation des sous questions   ---------
+                                        $.ajax({
+                                        'async': false,
+                                        'global': false,
+                                        'type': 'GET',
+                                        'url': '@Url.Action("ChoixSousQuestion", "Home")' + "?numero=" + response.data[0].id + "&questionid=" + response.data[question].page,
+                                        'dataType': "json",
+                                        'success': function (response_2) {
+                                            _question = response_2.oneData.numero_Sous_Question;
+
+                                            var url = '@Url.Action("SousQuestion", "Home")' + "?page=" + response.data[position].page + "&id=" + _question + "&nbreChoix=" + response.data[position].nbreChoix;
+                                            window.location.href = url;
+                                        }
+                                    });
+                                    //--- End Lot d'ingrémentation des sous questions ---------
+                                }
+                            });
+
+                        } else {
+                            var url = '@Url.Action("SousQuestion", "Home")' + "?page=" + question + "&id=" + page_suivante + "&nbreChoix=" + nbreChoix;
+                            window.location.href = url;
+                        }
+
+                    },
+                    error: function (data) {
+                        console.log(data);
+
+                    }
+                });                 
+                saveCocheTampon();
+               
+
+            } else {
+
+                DevExpress.ui.notify({
+                    message: "Vous devez cocher une reponse !",
+                    position: {
+                        my: "center top",
+                        at: "right top"
+                    }
+                }, "error", 6000)
+
+
+
+            }
+
+
+
+        }
+
+        function callValider() {
+           
+
+            if (listeCocher[0].suivant == true) {                
+
+                saveCocheTampon2(listeCocher[0]);
+
+                   // saveCocheTampon();
+                    // saveCoche(usermatricule);
+                    // saveLotCocher(listeCocher2);             
+                    // deleteCocheTampon(usermatricule);   
+                    
+                    var url = '@Url.Action("Valider", "Home")';
+                    window.location.href = url;
+
+
+
+            } else {
+
+
+                DevExpress.ui.notify({
+                    message: "Vous devez cocher une reponse !",
+                    position: {
+                        my: "center top",
+                        at: "right top"
+                    }
+                }, "error", 6000)
+
+
+            }
+
+             
+
+
+
+
+        }
+
+        function saveCoche(matricule) {
+
+            listeCocher2 = [];
+
+            if (matricule) {
+
+                            $.ajax({
+                           'async': false,
+                           'global': false,
+                           'type': 'GET',
+                           'url': '@Url.Action("ListeCocherTampon", "Home")' + "?matricule=" + matricule,
+                           'dataType': "json",
+                           'success': function (response) {
+
+                               console.log(response.data.length);
+
+                               response.data.forEach(element => {
+                                   let cocher = {};
+                                   cocher = {
+                                       date_Cocher: element.date_Cocher,
+                                       matricule: element.matricule,
+                                       choixId: element.choixId
+                                   };
+
+                                   listeCocher2.push(cocher);
+                                });
+
+                           },
+                             error: function (data) {
+                                   console.log(data);
+
+                             }
+                           });
+            }
+        }
+
+        function deleteCocheTampon(matricule) {
+
+            if (matricule) {
+
+
+                   $.ajax({
+                           'async': false,
+                           'global': false,
+                           'type': 'GET',
+                           'url': '@Url.Action("FindCocherTamponForDelete", "Home")' + "?matricule=" + matricule,
+                           'dataType': "json",
+                           'success': function (response) {
+                               console.log(response);
+
+
+                           },
+                             error: function (data) {
+                                   console.log(data);
+
+                             }
+                           });
+
+            }
+        }
+
+        function saveLotCocher(listeCocher2) {
+
+            var data = JSON.stringify( listeCocher2 );
+
+             //--- enregistrer element par element dans table Cocher
+                           $.ajax({
+                               type: "POST",
+                               url: '@Url.Action("AjouterCocher", "Home")',
+                               traditional: true,
+                               data: data,
+                               contentType: "application/json; charset=utf-8",
+                                success: function (response) {
+                                         console.log(response);
+
+                               },
+                                error: function (data) {
+                                   console.log(data);
+                                }
+                          });
+        }
+
+        function saveCocheTampon() {
+
+            listeCocher.forEach(element => {
+             
+                if (element) {
+
+                             $.ajax({
+                                       'type':'POST',
+                                       'url': '@Url.Action("CocherTampon", "Home")',
+                                       'data':element,
+                                       'dataType': "json",
+                                        'success': function (response) {
+
+                                            console.log(response);
+
+                                        },
+                                         error: function (data) {
+                                               console.log(data);
+                                         }
+                                 });
+                             
+                        };
+                }
+
+            );
+        }
+
+        function saveCocheTampon2(oneListeCocher) {
+
+           // oneListeCocher.forEach(element => {
+
+            if (oneListeCocher) {                   
+
+                    $.ajax({
+                        'type': 'POST',
+                        'url': '@Url.Action("CocherTampon", "Home")',
+                        'data': oneListeCocher,
+                        'dataType': "json",
+                        'success': function (response) {
+
+                            console.log(response);
+
+                        },
+                        error: function (data) {
+                            console.log(data);
+                        }
+                    });
+
+                };
+           // });
+        }
+
+        function callCocheTampon(_a){
+
+
+            switch (_a) {
+
+                case 2:
+
+                    $('#CheckBox_1').on('change', function () {
+                        if (this.checked) {
+
+                            listeCocher.push({ date_Cocher: userCreationDate, matricule: usermatricule, choixId: this.value, page: page_actuelle, position: page_suivante, questionId: question, sousQuestionId: sousQuestionId ,suivant: true, precedent: false })
+
+                        } else {
+                            let v = listeCocher.findIndex(el => el.choixId == this.value);
+                            listeCocher.splice(v, 1);
+                        }
+                    });
+
+                    $('#CheckBox_2').on('change', function () {
+                        if (this.checked) {
+
+                            listeCocher.push({ date_Cocher: userCreationDate, matricule: usermatricule, choixId: this.value, page: page_actuelle, position: page_suivante, questionId: question, sousQuestionId: sousQuestionId, suivant: true, precedent: false })
+
+                        } else {
+                            let v = listeCocher.findIndex(el => el.choixId == this.value);
+                            listeCocher.splice(v, 1);
+                        }
+                    });
+
+                    break;
+
+                case 3:
+
+                    $('#CheckBox_1').on('change', function () {
+                        if (this.checked) {
+
+                            listeCocher.push({ date_Cocher: userCreationDate, matricule: usermatricule, choixId: this.value, page: page_actuelle, position: page_suivante_2, questionId: question, sousQuestionId: sousQuestionId, nbreChoixRestant: nbreChoixRestant, suivant: true, precedent: false })
+
+                        } else {
+                            let v = listeCocher.findIndex(el => el.choixId == this.value);
+                            listeCocher.splice(v, 1);
+                        }
+                    });
+
+                    $('#CheckBox_2').on('change', function () {
+                        if (this.checked) {
+
+                            listeCocher.push({ date_Cocher: userCreationDate, matricule: usermatricule, choixId: this.value, page: page_actuelle, position: page_suivante_2, questionId: question, sousQuestionId: sousQuestionId, nbreChoixRestant: nbreChoixRestant, suivant: true, precedent: false })
+
+                        } else {
+                            let v = listeCocher.findIndex(el => el.choixId == this.value);
+                            listeCocher.splice(v, 1);
+                        }
+                    });
+
+                    $('#CheckBox_3').on('change', function () {
+                        if (this.checked) {
+
+                            listeCocher.push({ date_Cocher: userCreationDate, matricule: usermatricule, choixId: this.value, page: page_actuelle, position: page_suivante_2, questionId: question, sousQuestionId: sousQuestionId, nbreChoixRestant: nbreChoixRestant, suivant: true, precedent: false })
+
+                        } else {
+                            let v = listeCocher.findIndex(el => el.choixId == this.value);
+                            listeCocher.splice(v, 1);
+                        }
+                    });
+
+                    break;
+
+                case 4:
+
+
+                    break;
+
+                case 5:
+
+                    $('#CheckBox_1').on('change', function () {
+                        if (this.checked) {
+                            listeCocher.push({ date_Cocher: userCreationDate, matricule: usermatricule, choixId: this.value, page: page_actuelle, position: page_suivante, questionId: question, sousQuestionId: sousQuestionId, suivant: true, precedent: false })
+
+                        } else {
+                            let v = listeCocher.findIndex(el => el.choixId == this.value);
+                            listeCocher.splice(v, 1);
+                        }
+                    });
+
+                    $('#CheckBox_2').on('change', function () {
+                        if (this.checked) {
+
+                            listeCocher.push({ date_Cocher: userCreationDate, matricule: usermatricule, choixId: this.value, page: page_actuelle, position: page_suivante, questionId: question, sousQuestionId: sousQuestionId, suivant: true, precedent: false })
+
+                        } else {
+                            let v = listeCocher.findIndex(el => el.choixId == this.value);
+                            listeCocher.splice(v, 1);
+                        }
+                    });
+
+                    $('#CheckBox_3').on('change', function () {
+                        if (this.checked) {
+
+                            listeCocher.push({ date_Cocher: userCreationDate, matricule: usermatricule, choixId: this.value, page: page_actuelle, position: page_suivante, questionId: question, sousQuestionId: sousQuestionId, suivant: true, precedent: false })
+
+                        } else {
+                            let v = listeCocher.findIndex(el => el.choixId == this.value);
+                            listeCocher.splice(v, 1);
+                        }
+                    });
+
+                    $('#CheckBox_4').on('change', function () {
+                        if (this.checked) {
+
+                            listeCocher.push({ date_Cocher: userCreationDate, matricule: usermatricule, choixId: this.value, page: page_actuelle, position: page_suivante, questionId: question, sousQuestionId: sousQuestionId, suivant: true, precedent: false })
+
+                        } else {
+                            let v = listeCocher.findIndex(el => el.choixId == this.value);
+                            listeCocher.splice(v, 1);
+                        }
+                    });
+
+                    $('#CheckBox_5').on('change', function () {
+                        if (this.checked) {
+
+                            listeCocher.push({ date_Cocher: userCreationDate, matricule: usermatricule, choixId: this.value, page: page_actuelle, position: page_suivante, questionId: question, sousQuestionId: sousQuestionId, suivant: true, precedent: false })
+
+                        } else {
+                            let v = listeCocher.findIndex(el => el.choixId == this.value);
+                            listeCocher.splice(v, 1);
+                        }
+                    });
+
+                    break;
+
+            }
+
+        }
+
+        function selectOnlyThis(id, compteur) {
+
+
+        for (var i = 1; i <= compteur; i++) {
+
+            if ("CheckBox_" + i === id && document.getElementById("CheckBox_" + i).checked === true) {
+
+                $('#CheckBox_'+ i).on('change', function () {
+                    
+                    if (this.checked) {
+                        listeCocher.push({ date_Cocher: userCreationDate, matricule: usermatricule, choixId: this.value, page: page_actuelle, position: page_suivante_2, questionId: question, sousQuestionId: sousQuestionId, nbreChoixRestant: nbreChoixTampon, suivant: true, precedent: false })
+                    }
+                });
+
+
+              } else {
+                                                      
+                document.getElementById("CheckBox_" + i).checked = false;
+
+                if (document.getElementById("CheckBox_" + i).checked == false) {
+                        
+                        let v = listeCocher.findIndex(el => el.choixId == this.value);
+                        listeCocher.splice(v, 1);
+
+                    
+
+                }
+                        
+
+               
+
+
+
+
+                }
+            }
+     }
+
+    </script>
+
+
+}
